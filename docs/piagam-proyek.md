@@ -1,6 +1,6 @@
 # Piagam Proyek Data Warehouse
 Kelompok      : 5
-Proses bisnis : Penjualan 
+Proses bisnis : Penjualan Online
 Sponsor       : Mohamad Irwan Afandi, ST, M.Sc.
 
 ## 1. Latar belakang
