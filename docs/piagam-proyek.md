@@ -61,7 +61,7 @@ Di luar lingkup:
 | Nama | NPM | Peran Utama |
 |---|---|---|
 | Afiana Nurani | 23082010162 | Project Manager (Ketua Tim) |
-| Caroline Febryanty | ...167 | Dashboard Developer |
+| Caroline Febryanty | 23082010167 | Dashboard Developer |
 | Reva Luvika Apriliani | 23082010298 | OLAP Developer |
 | Zyndi Auralia Wibowo | 23082010185 | Data Modeler |
 | Vernanda Pramudya Sejati | 23082010188 | ETL Developer |
