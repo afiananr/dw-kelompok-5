@@ -52,10 +52,10 @@ Di luar lingkup:
 | Nama | NPM | Peran utama |
 |---|---|---|
 | Afiana Nurani | 23082010162 | Project Manager |
-| Caroline | 23082010167 | Dashboard Developer |
-| Reva | 23082010298 | OLAP Developer |
-| Zyndi | 23082010185 | Data Modeler |
-| Veve | 23082010188 | ETL Developer |
+| Caroline Febryanty | 23082010167 | Dashboard Developer |
+| Reva Luvika Apriliani | 23082010198 | OLAP Developer |
+| Zyndi Auralia Wibowo | 23082010185 | Data Modeler |
+| Vernanda Pramudya Sejati | 23082010188 | ETL Developer |
 
 ### Deskripsi Tanggung Jawab
 
