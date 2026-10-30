@@ -50,6 +50,7 @@ Di luar lingkup:
 
 ## 4. Tim dan peran
 | Nama | NPM | Peran utama |
+|---|---|---|
 | Afiana Nurani | 23082010162 | Project Manager |
 | Caroline | 23082010167 | Dashboard Developer |
 | Reva | 23082010298 | OLAP Developer |
