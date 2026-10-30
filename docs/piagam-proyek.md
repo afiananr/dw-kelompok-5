@@ -1,7 +1,7 @@
 # Piagam Proyek Data Warehouse
 Kelompok      : 5
 Proses bisnis : Penjualan 
-Sponsor       : 
+Sponsor       : Mohamad Irwan Afandi, ST, M.Sc.
 
 ## 1. Latar belakang
 Adventure Works merupakan perusahaan yang memiliki aktivitas penjualan melalui berbagai saluran, salah satunya adalah penjualan online. Dalam proses penjualan online, perusahaan menghasilkan data transaksi yang mencakup informasi pesanan, detail produk, pelanggan, waktu transaksi, wilayah penjualan, promosi, dan metode pengiriman. Data tersebut dapat dimanfaatkan untuk memahami performa penjualan serta mendukung pengambilan keputusan bisnis.
@@ -55,16 +55,6 @@ Di luar lingkup:
 | Reva | 23082010298 | OLAP Developer |
 | Zyndi | 23082010185 | Data Modeler |
 | Veve | 23082010188 | ETL Developer |
-
-## 4. Tim dan Peran
-
-| Nama | NPM | Peran Utama |
-|---|---|---|
-| Afiana Nurani | 23082010162 | Project Manager (Ketua Tim) |
-| Caroline Febryanty | 23082010167 | Dashboard Developer |
-| Reva Luvika Apriliani | 23082010298 | OLAP Developer |
-| Zyndi Auralia Wibowo | 23082010185 | Data Modeler |
-| Vernanda Pramudya Sejati | 23082010188 | ETL Developer |
 
 ### Deskripsi Tanggung Jawab
 
