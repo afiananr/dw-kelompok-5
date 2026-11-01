@@ -116,3 +116,6 @@ Sediakan satu anggota dimensi khusus untuk kondisi **tanpa promosi** agar baris 
 `SalesOrderHeader.TotalDue` merupakan nilai pada tingkat header pesanan. Jangan menjumlahkan `TotalDue` setelah join ke `SalesOrderDetail`, karena satu pesanan dapat memiliki banyak baris detail dan nilai header akan terduplikasi.
 
 Untuk analisis nilai penjualan per produk atau detail, gunakan measure yang dihitung dari `SalesOrderDetail` (gross, discount, net sales). Untuk total nilai pesanan, agregasikan pada tingkat order/header secara terpisah.
+
+## 6. Pernyataan Grain (Grain Statement)
+Satu baris pada tabel fakta merepresentasikan satu item produk dalam satu transaksi penjualan online (online sales order) berdasarkan SalesOrderID dan SalesOrderDetailID, yang mencatat jumlah produk, harga satuan, diskon, dan nilai penjualan.
