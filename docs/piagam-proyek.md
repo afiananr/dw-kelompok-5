@@ -1,52 +1,60 @@
 # Piagam Proyek Data Warehouse
-Kelompok      : 5
-Proses bisnis : Penjualan Online
-Sponsor       : Mohamad Irwan Afandi, ST, M.Sc.
+| Keterangan | Isi |
+|---|---|
+| Kelompok | 5 |
+| Proses Bisnis | Online Sales |
+| Sponsor | Mohamad Irwan Afandi, ST, M.Sc. |
+| Project Manager | Afiana Nurani |
+| Database Sumber | AdventureWorks PostgreSQL |
+| Database Target | `dw_kelompok_5` |
 
 ## 1. Latar belakang
-Adventure Works merupakan perusahaan yang memiliki aktivitas penjualan melalui berbagai saluran, salah satunya adalah penjualan online. Dalam proses penjualan online, perusahaan menghasilkan data transaksi yang mencakup informasi pesanan, detail produk, pelanggan, waktu transaksi, wilayah penjualan, promosi, dan metode pengiriman. Data tersebut dapat dimanfaatkan untuk memahami performa penjualan serta mendukung pengambilan keputusan bisnis.
+Adventure Works merupakan perusahaan fiktif yang bergerak di bidang penjualan produk sepeda dan komponennya. Perusahaan memiliki data operasional yang mencakup aktivitas penjualan, pelanggan, produk, wilayah penjualan, dan promosi.
 
-Namun, data transaksi yang tersimpan dalam basis data operasional belum secara khusus dirancang untuk kebutuhan analisis multidimensional. Manajemen membutuhkan informasi yang terintegrasi untuk mengetahui perkembangan penjualan dari waktu ke waktu, mengidentifikasi produk dengan penjualan tertinggi, menganalisis kontribusi penjualan berdasarkan wilayah dan pelanggan, serta mengevaluasi penggunaan promosi dalam transaksi online.
+Data penjualan yang tersimpan dalam database operasional belum secara langsung menyajikan informasi analitis yang terintegrasi untuk mendukung kebutuhan manajemen dalam mengevaluasi performa penjualan.
 
-Oleh karena itu, diperlukan pembangunan Data Warehouse yang berfokus pada proses bisnis penjualan online. Data dari berbagai tabel terkait akan diintegrasikan dan disusun menggunakan pendekatan dimensional modeling dengan skema bintang (Star Schema). Melalui Data Warehouse ini, data penjualan online diharapkan dapat disajikan secara terstruktur dan dianalisis melalui dashboard sehingga menghasilkan informasi yang membantu manajemen dalam mengevaluasi performa penjualan dan mendukung pengambilan keputusan secara lebih tepat.
+Beberapa informasi yang perlu dianalisis oleh manajemen meliputi tren penjualan, produk dengan kontribusi penjualan tertinggi, performa penjualan berdasarkan wilayah, perilaku pembelian pelanggan, serta efektivitas promosi.
+
+Oleh karena itu, diperlukan pembangunan Data Warehouse yang mengintegrasikan data dari berbagai tabel sumber sehingga informasi penjualan dapat diolah dan disajikan dalam bentuk dashboard untuk mendukung proses pengambilan keputusan.
 
 ## 2. Tujuan dan pertanyaan bisnis
-Tujuan proyek ini adalah membangun Data Warehouse yang dapat mengintegrasikan data transaksi penjualan online Adventure Works untuk menghasilkan informasi analitis mengenai performa penjualan. Informasi tersebut disajikan melalui dashboard guna membantu manajemen dalam memantau, mengevaluasi, dan mendukung pengambilan keputusan bisnis.
+Membangun Data Warehouse untuk proses Online Sales pada Adventure Works yang dapat mengintegrasikan data transaksi penjualan, produk, pelanggan, wilayah, dan promosi menjadi informasi analitis yang mudah dipahami melalui dashboard.
 
 Pertanyaan bisnis yang ingin dijawab melalui dashboard:
-1. Bagaimana tren nilai dan jumlah penjualan online berdasarkan bulan dan tahun?
-2. Produk dan kategori produk apa yang menghasilkan nilai penjualan online tertinggi?
-3. Wilayah mana yang memberikan kontribusi nilai penjualan online terbesar?
-4. Siapa pelanggan dengan jumlah transaksi dan total nilai pembelian tertinggi?
-5. Bagaimana pengaruh penggunaan promosi terhadap nilai penjualan online?
+1. Bagaimana tren jumlah transaksi dan nilai penjualan online berdasarkan periode waktu (bulanan dan tahunan)?
+2. Produk dan kategori produk apa yang memiliki nilai penjualan online tertinggi?
+3. Wilayah penjualan (territory) mana yang memberikan kontribusi nilai penjualan online terbesar?
+4. Siapa pelanggan dengan jumlah transaksi dan total pembelian tertinggi?
+5. Bagaimana perbandingan nilai penjualan, jumlah transaksi, dan rata-rata diskon antara transaksi yang menggunakan promosi dan yang tidak menggunakan promosi?
 
 ## 3. Ruang lingkup
 Masuk lingkup  : 
-- **Proses bisnis:** Analisis transaksi penjualan online (Online Sales) pada Adventure Works dengan mengambil data pesanan yang memiliki `OnlineOrderFlag = TRUE`.
-- **Rentang tahun data:** Mengikuti rentang tanggal transaksi yang tersedia pada database sumber berdasarkan hasil data profiling.
-- **Tabel sumber:**
-  - `Sales.SalesOrderHeader` – informasi utama pesanan penjualan online.
-  - `Sales.SalesOrderDetail` – detail produk dalam setiap transaksi.
-  - `Production.Product` – informasi produk.
-  - `Production.ProductSubcategory` – informasi subkategori produk.
-  - `Production.ProductCategory` – informasi kategori produk.
-  - `Sales.Customer` – informasi pelanggan.
-  - `Person.Person` – informasi nama pelanggan.
-  - `Person.Address` – informasi alamat pelanggan.
-  - `Sales.SalesTerritory` – informasi wilayah penjualan.
-  - `Sales.SpecialOffer` – informasi promosi.
-- Perancangan Data Warehouse menggunakan pendekatan dimensional modeling dengan skema bintang (Star Schema).
-- Pengolahan dan integrasi data menggunakan Pentaho Data Integration CE.
-- Analisis data multidimensional menggunakan Mondrian.
-- Penyajian hasil analisis penjualan online melalui dashboard.
+- **Proses bisnis:** Online Sales, yaitu transaksi dengan `OnlineOrderFlag = TRUE`.
+- **Rentang tahun data:** 2022–2025, berdasarkan rentang tanggal transaksi online yang ditemukan pada profiling awal, yaitu 30 Mei 2022–29 Juni 2025.
+- Pembangunan Data Warehouse menggunakan pendekatan *dimensional modeling* dengan skema **Star Schema**.
+- Proses ETL (*Extract, Transform, Load*) dari database sumber AdventureWorks PostgreSQL ke database target.
+- Pengembangan analisis multidimensional menggunakan teknologi OLAP.
+- Pembuatan dashboard untuk menyajikan KPI dan analisis penjualan online.
+- **Tabel Sumber yang Digunakan:**
+| Schema | Tabel |
+|---|---|
+| Sales | `SalesOrderHeader` |
+| Sales | `SalesOrderDetail` |
+| Sales | `Customer` |
+| Sales | `SalesTerritory` |
+| Sales | `SpecialOffer` |
+| Production | `Product` |
+| Production | `ProductSubcategory` |
+| Production | `ProductCategory` |
+| Person | `Person` |
+| Person | `Address` |
 
 Di luar lingkup: 
-- Analisis transaksi penjualan offline atau penjualan langsung.
-- Analisis proses bisnis pembelian, persediaan, dan produksi.
-- Analisis kinerja salesperson dan vendor.
-- Pembangunan atau pengembangan sistem transaksi penjualan online.
-- Prediksi penjualan menggunakan machine learning.
-- Analisis keuangan perusahaan secara keseluruhan di luar proses penjualan online.
+-  Analisis transaksi penjualan offline (`OnlineOrderFlag = FALSE`).
+-  Pengembangan sistem transaksi penjualan operasional (OLTP).
+-  Pengembangan aplikasi e-commerce atau sistem pemesanan baru.
+-  Analisis keuangan perusahaan secara menyeluruh di luar kebutuhan analisis penjualan online.
+-  Prediksi penjualan menggunakan *Machine Learning*.
 
 ## 4. Tim dan peran
 | Nama | NPM | Peran utama |
@@ -91,26 +99,29 @@ Di luar lingkup:
 - **ETL:** Pentaho Data Integration Community Edition (PDI CE).
 - **OLAP:** Mondrian.
 - **Dashboard:** Chart.js (visualisasi data pada dashboard web).
+- **Data modeling:** Star Schema
 - **Version Control:** Git dan GitHub.
+- **Development environment:** Visual Studio Code
 
 ## 6. Risiko awal
-| Risiko | Dampak | Rencana penanganan |
+| Risiko | Dampak | Rencana Penanganan |
 |---|---|---|
-| Ketidakcocokan versi Java dengan Pentaho Data Integration | Proses ETL tidak dapat dijalankan atau mengalami error. | Memastikan versi Java kompatibel dengan Pentaho sebelum proses instalasi dan implementasi. |
-| Database Adventure Works gagal direstore | Data sumber tidak dapat diakses sehingga menghambat pengerjaan proyek. | Memastikan file database tersedia dan mengikuti prosedur restore PostgreSQL dengan benar. |
-| Terdapat data NULL, duplikat, atau tidak valid pada database sumber | Kualitas data menurun dan hasil analisis menjadi kurang akurat. | Melakukan data profiling, validasi, dan penanganan data sebelum proses ETL. |
-| Ketidaksesuaian hasil perhitungan antara database sumber dan Data Warehouse | Informasi yang ditampilkan pada dashboard tidak akurat. | Melakukan pengujian dan rekonsiliasi hasil query pada database sumber dengan hasil pemuatan ke Data Warehouse. |
-| Perubahan rancangan Star Schema saat proses pengembangan | Proses ETL, OLAP, dan dashboard perlu disesuaikan kembali. | Memvalidasi grain, dimensi, dan fakta sebelum implementasi serta mendokumentasikan setiap perubahan. |
-| Keterlambatan penyelesaian tugas anggota kelompok | Target pengerjaan mingguan tidak tercapai. | Membagi tugas sesuai peran, memantau progres secara berkala, dan melakukan koordinasi antaranggota. |
+| Ketidakcocokan versi Java dan Pentaho | Proses ETL tidak dapat berjalan dengan baik | Memeriksa kompatibilitas versi Java dan Pentaho sebelum implementasi |
+| Kesalahan proses ETL | Data pada Data Warehouse tidak sesuai dengan sumber | Melakukan validasi jumlah record dan rekonsiliasi nilai penjualan |
+| Data NULL atau tidak valid | Hasil analisis berpotensi tidak akurat | Melakukan *data profiling* dan menetapkan aturan *data cleansing* |
+| Kesalahan rancangan Star Schema | Terjadi duplikasi atau kesalahan agregasi data | Memvalidasi *grain fact table* dan relasi dimensi |
+| Keterlambatan pengerjaan anggota | Integrasi proyek tidak sesuai target | Membuat *task tracker* dan melakukan evaluasi progres secara rutin |
+| Ketidaksesuaian hasil dashboard | Informasi yang ditampilkan tidak akurat | Membandingkan hasil dashboard dengan query pada database sumber atau Data Warehouse |
 
 
 ## 7. Kriteria sukses
-Proyek Data Warehouse Penjualan Online Adventure Works dinyatakan berhasil apabila memenuhi kriteria berikut:
+Proyek Data Warehouse Kelompok 5 dinyatakan berhasil apabila memenuhi kriteria berikut:
 
-1. Data Warehouse berhasil dibangun menggunakan pendekatan Star Schema sesuai dengan kebutuhan analisis penjualan online.
-2. Data transaksi penjualan online berhasil diekstraksi, ditransformasikan, dan dimuat dari database sumber ke database Data Warehouse menggunakan Pentaho Data Integration.
-3. Data yang dimuat ke Data Warehouse memiliki kualitas dan konsistensi yang baik berdasarkan hasil validasi data.
-4. Skema Mondrian berhasil dikonfigurasi dan query MDX dapat dijalankan untuk mendukung analisis multidimensional.
-5. Dashboard berhasil menampilkan visualisasi yang dapat menjawab minimal lima pertanyaan bisnis yang telah ditentukan.
-6. Hasil perhitungan nilai dan jumlah penjualan pada dashboard sesuai dengan hasil query pembanding pada database sumber.
-7. Dokumentasi proyek, rancangan Data Warehouse, script SQL, proses ETL, dan hasil pengembangan tersimpan dalam repository GitHub kelompok.
+1. Database sumber AdventureWorks PostgreSQL berhasil diakses dan digunakan dalam proses pengolahan data.
+2. Data Warehouse berhasil dibangun dengan struktur *fact table* dan *dimension table* berdasarkan rancangan Star Schema.
+3. Proses ETL berhasil memindahkan dan mengolah data transaksi Online Sales ke database target.
+4. Hasil ETL memiliki kesesuaian jumlah record dengan data sumber setelah menerapkan filter dan aturan transformasi yang ditentukan.
+5. Nilai penjualan pada Data Warehouse dapat direkonsiliasi dengan hasil query sumber menggunakan rumus perhitungan yang sama.
+6. Model OLAP dapat digunakan untuk melakukan analisis multidimensional, seperti *drill-down*, *roll-up*, *slice*, dan *dice*.
+7. Dashboard mampu menyajikan informasi untuk menjawab minimal lima pertanyaan bisnis yang telah ditetapkan.
+8. Seluruh dokumentasi, kode, dan bukti pengerjaan tersimpan dalam repository GitHub kelompok.
