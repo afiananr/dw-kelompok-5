@@ -17,9 +17,9 @@
 | Menyusun Source-to-Target Mapping untuk seluruh tabel target. | Selesai pada tahap dokumentasi | [Source-to-Target Mapping](../03-data-model/source-to-target-mapping.md) |
 | Menentukan strategi SCD untuk setiap dimension. | Selesai pada tahap desain | DIM_DATE Type 0, DIM_PRODUCT Type 2, DIM_CUSTOMER Type 2, DIM_TERRITORY Type 1, DIM_PROMOTION Type 1, dan DIM_CURRENCY Type 0. [Source-to-Target Mapping](../03-data-model/source-to-target-mapping.md) |
 | Menentukan urutan load dari staging hingga fact table. | Selesai pada tahap desain | Urutan load staging, dimension, dan fact didokumentasikan pada [Source-to-Target Mapping](../03-data-model/source-to-target-mapping.md). |
-| Merancang OLAP Cube beserta dimension, hierarki, measures, dan calculated member. | Selesai pada tahap desain | [Desain OLAP Cube](../04-olap/cube-design.md) |
+| Merancang OLAP Cube beserta dimension, hierarki, measures, dan calculated member. | Selesai pada tahap desain | [Desain OLAP Cube](../04-OLAP/cube-design.md) |
 | Membuat wireframe dashboard untuk menjawab lima Business Questions. | Selesai pada tahap wireframe | [Dokumentasi Wireframe Dashboard](../05-dashboard/dashboard-wireframe.md) dan [Wireframe Dashboard PNG](../05-dashboard/dashboard-wireframe.png) |
-| Menjalankan query sederhana menggunakan Table Input. | Selesai | Query transaksi online berhasil dijalankan dan Preview Data menampilkan data. [Bukti Table Input dan hasil query](../04-olap/pentaho/table-input-query-result.png) |
+| Menjalankan query sederhana menggunakan Table Input. | Selesai | Query transaksi online berhasil dijalankan dan Preview Data menampilkan data. [Bukti Table Input dan hasil query](../04-olap/pentaho/table_input_query_result.png) |
 | Mengimplementasikan seluruh proses ETL untuk dimension dan fact. | Belum dilakukan | Menjadi pekerjaan lanjutan setelah pengujian koneksi dasar Pentaho. |
 | Mengonfigurasi OLAP Cube pada Mondrian dan menguji query MDX. | Belum dilakukan | Desain cube telah tersedia; konfigurasi dan pengujian implementasi belum dilakukan. |
 | Mengintegrasikan dashboard dengan data aktual dari OLAP Cube. | Belum dilakukan | Wireframe telah tersedia; integrasi data dan implementasi dashboard menjadi pekerjaan berikutnya. |
@@ -148,12 +148,12 @@ Simpan bukti tangkapan layar pada folder `laporan_pekan10_assets/`, kemudian ses
 
 ### D. Wireframe Online Sales Performance Dashboard
 
-![Wireframe Dashboard Pekan 10](../05-dashboard/Online Sales Performance Dashboard.png)
+![Wireframe Dashboard Pekan 10](../05-dashboard/dashboard-wireframe.png)
 
 
 ### E. Table Input dan hasil query transaksi online
 
-![Table Input dan hasil query](laporan_pekan10_assets/table-input-query-result.png)
+![Table Input dan hasil query](laporan_pekan10_assets/table_input_query_result.png)
 
 ## Kesimpulan
 
