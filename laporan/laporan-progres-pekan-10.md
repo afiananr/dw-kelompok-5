@@ -153,7 +153,7 @@ Simpan bukti tangkapan layar pada folder `laporan_pekan10_assets/`, kemudian ses
 
 ### E. Table Input dan hasil query transaksi online
 
-![Table Input dan hasil query](laporan_pekan10_assets/table_input_query_result.png)
+![Table Input dan hasil query](Laporan_pekan10_assets/table_input_query_result.png)
 
 ## Kesimpulan
 
