@@ -123,10 +123,10 @@ Belum ada informasi terverifikasi mengenai kendala komunikasi, anggota yang suli
 | Nama | Peran | Yang dikerjakan pekan ini | Bukti commit |
 |---|---|---|---|
 | Afiana Nurani | Project Manager | Koordinasi dan pemantauan progres proyek serta dokumentasi laporan Pekan 10. Rincian aktivitas aktual perlu dikonfirmasi. | Belum dicantumkan |
-| Caroline Febryanty | Dashboard Developer | Menyusun wireframe Online Sales Performance Dashboard menggunakan Figma AI, mencakup KPI dan lima visualisasi BQ1–BQ5. | [Bukti commit untuk wireframe dashboard](laporan/laporan_pekan10_assets/bukti_commit_caroline.png) |
-| Reva Luvika Apriliani | OLAP Developer | Menyusun desain Online Sales Cube, hierarki dimension, measures, dan calculated member. | [Bukti commit untuk cube design](laporan/laporan_pekan10_assets/bukti_commit_reva.png)|
-| Zyndi Auralia Wibowo | Data Modeler | Menyempurnakan rancangan Star Schema V2, Source-to-Target Mapping, dan strategi SCD. | [Bukti commit untuk star schema v2 dan source to source target mapping](laporan/laporan_pekan10_assets/bukti_commit_zyndi.png) |
-| Vernanda Pramudya Sejati | ETL Developer | Menyiapkan PDI CE 9.4, menjalankan Spoon, menghubungkan MySQL `adventureworks`, dan menguji query menggunakan Table Input. | [Bukti commit untuk test connection pentaho](laporan/laporan_pekan10_assets/bukti_commit_vernanda.png) |
+| Caroline Febryanty | Dashboard Developer | Menyusun wireframe Online Sales Performance Dashboard menggunakan Figma AI, mencakup KPI dan lima visualisasi BQ1–BQ5. | [Bukti commit untuk wireframe dashboard](laporan_pekan10_assets/bukti_commit_caroline.png) |
+| Reva Luvika Apriliani | OLAP Developer | Menyusun desain Online Sales Cube, hierarki dimension, measures, dan calculated member. | [Bukti commit untuk cube design](laporan_pekan10_assets/bukti_commit_reva.png)|
+| Zyndi Auralia Wibowo | Data Modeler | Menyempurnakan rancangan Star Schema V2, Source-to-Target Mapping, dan strategi SCD. | [Bukti commit untuk star schema v2 dan source to source target mapping](laporan_pekan10_assets/bukti_commit_zyndi.png) |
+| Vernanda Pramudya Sejati | ETL Developer | Menyiapkan PDI CE 9.4, menjalankan Spoon, menghubungkan MySQL `adventureworks`, dan menguji query menggunakan Table Input. | [Bukti commit untuk test connection pentaho](laporan_pekan10_assets/bukti_commit_vernanda.png) |
 
 **Catatan:** Kolom bukti commit perlu diisi dengan tautan commit GitHub yang benar-benar tersedia. Pembagian kontribusi di atas mengikuti area tanggung jawab masing-masing anggota dan perlu dikonfirmasi sebelum laporan diserahkan.
 
@@ -136,7 +136,7 @@ Simpan bukti tangkapan layar pada folder `laporan_pekan10_assets/`, kemudian ses
 
 ### A. Revisi Star Schema V2
 
-![Star Schema V2](laporan/laporan_pekan10_assets/star-schema-v2.png)
+![Star Schema V2](laporan_pekan10_assets/star-schema-v2.png)
 
 ### B. Source-to-Target Mapping
 
@@ -153,7 +153,7 @@ Simpan bukti tangkapan layar pada folder `laporan_pekan10_assets/`, kemudian ses
 
 ### E. Table Input dan hasil query transaksi online
 
-![Table Input dan hasil query](laporan/laporan_pekan10_assets/table-input-query-result.png)
+![Table Input dan hasil query](laporan_pekan10_assets/table-input-query-result.png)
 
 ## Kesimpulan
 
