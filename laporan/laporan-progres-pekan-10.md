@@ -136,7 +136,7 @@ Simpan bukti tangkapan layar pada folder `laporan_pekan10_assets/`, kemudian ses
 
 ### A. Revisi Star Schema V2
 
-![Star Schema V2](laporan_pekan10_assets/star-schema-v2.png)
+![Star Schema V2](Laporan_pekan10_assets/star-schema-v2.png)
 
 ### B. Source-to-Target Mapping
 
