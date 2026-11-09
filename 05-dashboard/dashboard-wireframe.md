@@ -4,7 +4,7 @@
 **Kelompok:** 5\
 **Dashboard:** Online Sales Performance\
 **Sumber data:** Data Warehouse `dw_kelompok_5`\
-**OLAP Cube:** Online Sales Cube\
+**OLAP Cube:** Online Sales Cube
 **Status:** Rancangan wireframe (belum terhubung ke data aktual)
 
 ------------------------------------------------------------------------
