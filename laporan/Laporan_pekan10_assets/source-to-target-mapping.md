@@ -1,437 +1,282 @@
-# Source-to-Target Mapping --- Star Schema V2
+# Source-to-Target Mapping — Star Schema V2
 
-**Proyek:** Data Warehouse AdventureWorks --- Online Sales\
-**Database sumber:** `adventureworks`\
-**Database target:** `dw_kelompok_5`\
-**Fact table:** `fact_online_sales`\
-**Grain:** Satu baris pada `fact_online_sales` merepresentasikan satu
-baris detail produk dalam satu transaksi penjualan online
-(`onlineorderflag = TRUE`).
+**Proyek:** Data Warehouse AdventureWorks — Online Sales  
+**Kelompok:** 5  
+**Database sumber:** `adventureworks` (MySQL/MariaDB)  
+**Database target:** `dw_kelompok_5` (MariaDB)  
+**Fact table:** `fact_online_sales`  
+**ETL Tool:** Pentaho Data Integration (PDI)  
+**Versi dokumen:** Revisi — mengikuti standar `dim_tanggal` dosen
 
-> **Catatan:** Dokumen ini merupakan rancangan mapping untuk
-> implementasi ETL. Aturan yang masih berupa asumsi, khususnya penetapan
-> USD untuk transaksi tanpa `currencyrateid`, harus divalidasi sebelum
-> ETL final.
+---
 
-------------------------------------------------------------------------
+## 1. Tujuan dan Grain
 
-## Target: dim_date (SCD: Type 0)
+Dokumen ini menjelaskan pemetaan kolom dari database sumber AdventureWorks ke tabel-tabel pada Data Warehouse `dw_kelompok_5` sebagai acuan implementasi ETL menggunakan Pentaho Data Integration.
 
-**Sumber utama:** Generated Calendar (dibentuk pada proses ETL, bukan
-diambil dari satu tabel sumber).
+**Grain fact table:** Satu baris pada `fact_online_sales` merepresentasikan satu baris detail produk dalam satu transaksi penjualan online.
 
-  ----------------------------------------------------------------------------------
-  Kolom target     Tipe           Tabel.kolom sumber   Transformasi   Aturan NULL
-  ---------------- -------------- -------------------- -------------- --------------
-  date_key         INT            Generated            Format tanggal Tidak boleh
-                                  Calendar.full_date   menjadi        NULL
-                                                       `YYYYMMDD`     
+Transaksi online dipilih menggunakan kondisi:
 
-  full_date        DATE           Generated Calendar   Generate       Tidak boleh
-                                                       seluruh        NULL
-                                                       tanggal dalam  
-                                                       rentang        
-                                                       periode data   
-
-  day_number       INT            Generated            Ekstrak angka  Tidak boleh
-                                  Calendar.full_date   hari (1--31)   NULL
-
-  day_name         VARCHAR        Generated            Ambil nama     Tidak boleh
-                                  Calendar.full_date   hari           NULL
-                                                       berdasarkan    
-                                                       tanggal        
-
-  month_number     INT            Generated            Ekstrak angka  Tidak boleh
-                                  Calendar.full_date   bulan (1--12)  NULL
-
-  month_name       VARCHAR        Generated            Ambil nama     Tidak boleh
-                                  Calendar.full_date   bulan          NULL
-
-  quarter_number   INT            Generated            Hitung kuartal Tidak boleh
-                                  Calendar.full_date   berdasarkan    NULL
-                                                       bulan          
-
-  year_number      INT            Generated            Ekstrak tahun  Tidak boleh
-                                  Calendar.full_date                  NULL
-
-  is_weekend       BOOLEAN        Generated            TRUE jika hari Tidak boleh
-                                  Calendar.full_date   Sabtu atau     NULL
-                                                       Minggu         
-  ----------------------------------------------------------------------------------
-
-------------------------------------------------------------------------
-
-## Target: dim_product (SCD: Type 2)
-
-**Sumber utama:** `production.product`\
-**Sumber tambahan:** `production.productmodel`,
-`production.productsubcategory`, `production.productcategory`.
-
-  ------------------------------------------------------------------------------------------------------------------------------------------------------
-  Kolom target               Tipe            Tabel.kolom sumber                               Transformasi                             Aturan NULL
-  -------------------------- --------------- ------------------------------------------------ ---------------------------------------- -----------------
-  product_key                INT             \-                                               Surrogate key dari DW (identity)         Tidak boleh NULL
-
-  product_id                 INT             `production.product.productid`                   Ambil langsung sebagai business key      Tidak boleh NULL
-
-  product_name               VARCHAR         `production.product.name`                        Ambil langsung                           Tidak boleh NULL
-
-  product_number             VARCHAR         `production.product.productnumber`               Ambil langsung                           Tidak boleh NULL
-
-  product_model_id           INT             `production.product.productmodelid`              Ambil langsung                           NULL
-                                                                                                                                       diperbolehkan
-                                                                                                                                       jika tidak
-                                                                                                                                       memiliki model
-
-  product_model_name         VARCHAR         `production.productmodel.name`                   LEFT JOIN berdasarkan `productmodelid`   Jika NULL, isi
-                                                                                                                                       `Not Assigned`
-
-  product_subcategory_id     INT             `production.product.productsubcategoryid`        Ambil langsung                           NULL
-                                                                                                                                       diperbolehkan
-                                                                                                                                       jika tidak
-                                                                                                                                       memiliki
-                                                                                                                                       subkategori
-
-  product_subcategory_name   VARCHAR         `production.productsubcategory.name`             LEFT JOIN berdasarkan                    Jika NULL, isi
-                                                                                              `productsubcategoryid`                   `Not Assigned`
-
-  product_category_id        INT             `production.productcategory.productcategoryid`   LEFT JOIN melalui                        NULL
-                                                                                              `productsubcategory.productcategoryid`   diperbolehkan
-                                                                                                                                       jika tidak
-                                                                                                                                       memiliki kategori
-
-  product_category_name      VARCHAR         `production.productcategory.name`                LEFT JOIN melalui tabel subkategori      Jika NULL, isi
-                                                                                                                                       `Not Assigned`
-
-  color                      VARCHAR         `production.product.color`                       Ambil langsung                           Jika NULL, isi
-                                                                                                                                       `Not Specified`
-
-  size                       VARCHAR         `production.product.size`                        Ambil langsung                           Jika NULL, isi
-                                                                                                                                       `Not Specified`
-
-  standard_cost              NUMERIC(18,4)   `production.product.standardcost`                Ambil langsung                           NULL
-                                                                                                                                       diperbolehkan
-                                                                                                                                       jika sumber NULL
-
-  list_price                 NUMERIC(18,4)   `production.product.listprice`                   Ambil langsung                           NULL
-                                                                                                                                       diperbolehkan
-                                                                                                                                       jika sumber NULL
-
-  effective_start_date       DATE            ETL process                                      Tanggal mulai berlakunya versi dimension Tidak boleh NULL;
-                                                                                                                                       default awal
-                                                                                                                                       sesuai kebijakan
-                                                                                                                                       ETL
-
-  effective_end_date         DATE            ETL process                                      Tanggal akhir berlakunya versi; versi    Tidak boleh NULL
-                                                                                              aktif menggunakan tanggal maksimum       
-
-  is_current                 BOOLEAN         ETL process                                      TRUE untuk versi terbaru, FALSE untuk    Tidak boleh NULL
-                                                                                              versi sebelumnya                         
-  ------------------------------------------------------------------------------------------------------------------------------------------------------
-
-**Aturan SCD Type 2:** Jika atribut yang dipantau berubah, tutup versi
-lama dengan mengisi `effective_end_date` dan `is_current = FALSE`,
-kemudian buat baris versi baru dengan surrogate key baru. Sumber saat
-ini tidak otomatis menyediakan seluruh riwayat perubahan masa lalu.
-
-------------------------------------------------------------------------
-
-## Target: dim_customer (SCD: Type 2)
-
-**Sumber utama:** `sales.customer`\
-**Sumber tambahan:** `person.person`, `sales.store`.
-
-  -----------------------------------------------------------------------------------------------------------
-  Kolom target           Tipe           Tabel.kolom sumber            Transformasi           Aturan NULL
-  ---------------------- -------------- ----------------------------- ---------------------- ----------------
-  customer_key           INT            \-                            Surrogate key dari DW  Tidak boleh NULL
-                                                                      (identity)             
-
-  customer_id            INT            `sales.customer.customerid`   Ambil langsung sebagai Tidak boleh NULL
-                                                                      business key           
-
-  person_id              INT            `sales.customer.personid`     Ambil langsung         NULL
-                                                                                             diperbolehkan
-
-  store_id               INT            `sales.customer.storeid`      Ambil langsung         NULL
-                                                                                             diperbolehkan
-
-  customer_type          VARCHAR        `sales.customer.personid`,    Jika `storeid`         Jika keduanya
-                                        `sales.customer.storeid`      tersedia: `Store`;     NULL, isi
-                                                                      jika `personid`        `Unknown`
-                                                                      tersedia:              
-                                                                      `Individual`; selain   
-                                                                      itu: `Unknown`         
-
-  customer_name          VARCHAR        `person.person.firstname`,    LEFT JOIN melalui      Jika tidak
-                                        `middlename`, `lastname`      `customer.personid`,   tersedia, isi
-                                                                      gabungkan nama yang    `Not Assigned`
-                                                                      tersedia               
-
-  store_name             VARCHAR        `sales.store.name`            LEFT JOIN melalui      Jika NULL, isi
-                                                                      `customer.storeid`     `Not Assigned`
-
-  effective_start_date   DATE           ETL process                   Tanggal mulai          Tidak boleh NULL
-                                                                      berlakunya versi       
-                                                                      dimension              
-
-  effective_end_date     DATE           ETL process                   Tanggal akhir          Tidak boleh NULL
-                                                                      berlakunya versi;      
-                                                                      versi aktif            
-                                                                      menggunakan tanggal    
-                                                                      maksimum               
-
-  is_current             BOOLEAN        ETL process                   TRUE untuk versi       Tidak boleh NULL
-                                                                      terbaru, FALSE untuk   
-                                                                      versi sebelumnya       
-  -----------------------------------------------------------------------------------------------------------
-
-**Aturan SCD Type 2:** Jika atribut customer yang dipantau berubah, buat
-versi baru. Saat fact dimuat, cari `customer_key` berdasarkan
-`customer_id` dan rentang tanggal transaksi agar versi yang sesuai
-dengan transaksi digunakan.
-
-------------------------------------------------------------------------
-
-## Target: dim_territory (SCD: Type 1)
-
-**Sumber utama:** `sales.salesterritory`.
-
-  -------------------------------------------------------------------------------------------------------------
-  Kolom target          Tipe           Tabel.kolom sumber                         Transformasi   Aturan NULL
-  --------------------- -------------- ------------------------------------------ -------------- --------------
-  territory_key         INT            \-                                         Surrogate key  Tidak boleh
-                                                                                  dari DW        NULL
-                                                                                  (identity)     
-
-  territory_id          INT            `sales.salesterritory.territoryid`         Ambil langsung Tidak boleh
-                                                                                  sebagai        NULL
-                                                                                  business key   
-
-  territory_name        VARCHAR        `sales.salesterritory.name`                Ambil langsung Tidak boleh
-                                                                                                 NULL
-
-  country_region_code   VARCHAR        `sales.salesterritory.countryregioncode`   Ambil langsung Jika NULL, isi
-                                                                                                 `Unknown`
-
-  territory_group       VARCHAR        `sales.salesterritory."group"`             Ambil          Jika NULL, isi
-                                                                                  langsung;      `Unknown`
-                                                                                  gunakan tanda  
-                                                                                  kutip ganda    
-                                                                                  untuk nama     
-                                                                                  kolom `group`  
-                                                                                  di PostgreSQL  
-  -------------------------------------------------------------------------------------------------------------
-
-**Aturan SCD Type 1:** Perubahan atribut memperbarui nilai yang
-tersimpan tanpa mempertahankan versi sebelumnya. Territory tidak
-dihubungkan ke satu salesperson karena satu territory dapat memiliki
-beberapa salesperson dan seluruh transaksi online yang diperiksa
-memiliki `salespersonid` NULL.
-
-------------------------------------------------------------------------
-
-## Target: dim_promotion (SCD: Type 1)
-
-**Sumber utama:** `sales.specialoffer`.
-
-  -------------------------------------------------------------------------------------------------------
-  Kolom target       Tipe           Tabel.kolom sumber                    Transformasi   Aturan NULL
-  ------------------ -------------- ------------------------------------- -------------- ----------------
-  promotion_key      INT            \-                                    Surrogate key  Tidak boleh NULL
-                                                                          dari DW        
-                                                                          (identity)     
-
-  special_offer_id   INT            `sales.specialoffer.specialofferid`   Ambil langsung Tidak boleh NULL
-                                                                          sebagai        untuk promosi
-                                                                          business key   sumber
-
-  description        VARCHAR        `sales.specialoffer.description`      Ambil langsung Jika NULL, isi
-                                                                                         `Not Assigned`
-
-  offer_type         VARCHAR        `sales.specialoffer.type`             Ambil langsung Jika NULL, isi
-                                                                                         `Not Assigned`
-
-  category           VARCHAR        `sales.specialoffer.category`         Ambil langsung Jika NULL, isi
-                                                                                         `Not Assigned`
-
-  discount_pct       NUMERIC(8,4)   `sales.specialoffer.discountpct`      Ambil          Jika NULL, isi 0
-                                                                          persentase     
-                                                                          diskon dari    
-                                                                          master promosi 
-
-  promotion_status   VARCHAR        `sales.specialoffer.startdate`,       Hitung status  Jika tanggal
-                                    `enddate`                             berdasarkan    tidak lengkap,
-                                                                          tanggal proses isi `Unknown`
-                                                                          ETL:           
-                                                                          `Upcoming`,    
-                                                                          `Active`, atau 
-                                                                          `Expired`      
-  -------------------------------------------------------------------------------------------------------
-
-**Anggota khusus:** Buat satu baris `No Promotion` pada `dim_promotion`
-untuk transaksi yang tidak menggunakan promosi. Gunakan surrogate key
-anggota tersebut saat lookup fact.
-
-**Aturan SCD Type 1:** Perubahan atribut promosi memperbarui nilai yang
-tersimpan tanpa membuat versi historis.
-
-------------------------------------------------------------------------
-
-## Target: dim_currency (SCD: Type 0)
-
-**Sumber utama:** `sales.currency`.
-
-  --------------------------------------------------------------------------------------------
-  Kolom target    Tipe           Tabel.kolom sumber              Transformasi   Aturan NULL
-  --------------- -------------- ------------------------------- -------------- --------------
-  currency_key    INT            \-                              Surrogate key  Tidak boleh
-                                                                 dari DW        NULL
-                                                                 (identity)     
-
-  currency_code   VARCHAR        `sales.currency.currencycode`   Ambil langsung Tidak boleh
-                                                                 sebagai        NULL
-                                                                 business key   
-
-  currency_name   VARCHAR        `sales.currency.name`           Ambil langsung Tidak boleh
-                                                                                NULL
-  --------------------------------------------------------------------------------------------
-
-**Aturan lookup mata uang transaksi:** Dari
-`sales.salesorderheader.currencyrateid`, LEFT JOIN ke
-`sales.currencyrate.currencyrateid`, lalu gunakan `tocurrencycode` untuk
-lookup ke `sales.currency.currencycode`.
-
-**Asumsi yang perlu divalidasi:** Transaksi dengan `currencyrateid` NULL
-sementara dipetakan ke USD sebagai mata uang dasar. Validasi asumsi ini
-terhadap aturan bisnis atau metadata sumber sebelum ETL final.
-
-**Aturan SCD Type 0:** Nilai dimension dipertahankan dan tidak
-diperbarui melalui mekanisme historisasi.
-
-------------------------------------------------------------------------
-
-## Target: fact_online_sales (Grain: satu baris detail produk per transaksi online)
-
-**Sumber utama:** `sales.salesorderdetail`\
-**Sumber tambahan:** `sales.salesorderheader`, `sales.currencyrate`,
-serta seluruh dimension pada DW.
-
-  -----------------------------------------------------------------------------------------------------------------------------------------------------
-  Kolom target            Tipe            Tabel.kolom sumber                            Transformasi                                   Aturan NULL
-  ----------------------- --------------- --------------------------------------------- ---------------------------------------------- ----------------
-  sales_order_detail_id   INT             `sales.salesorderdetail.salesorderdetailid`   Ambil ID detail sebagai primary key fact       Tidak boleh NULL
-
-  sales_order_id          INT             `sales.salesorderdetail.salesorderid`         Ambil ID transaksi                             Tidak boleh NULL
-
-  date_key                INT             `sales.salesorderheader.orderdate`            Lookup ke `dim_date` menggunakan format        Jika tidak
-                                                                                        `YYYYMMDD`                                     ditemukan,
-                                                                                                                                       gunakan unknown
-                                                                                                                                       date key
-
-  product_key             INT             `dim_product.product_id`                      Lookup surrogate key berdasarkan `product_id`  Jika tidak
-                                                                                        dan versi yang berlaku pada tanggal transaksi  ditemukan,
-                                                                                                                                       gunakan unknown
-                                                                                                                                       product key
-
-  customer_key            INT             `sales.salesorderheader.customerid` →         Lookup surrogate key berdasarkan customer dan  Jika tidak
-                                          `dim_customer.customer_id`                    tanggal transaksi                              ditemukan,
-                                                                                                                                       gunakan unknown
-                                                                                                                                       customer key
-
-  territory_key           INT             `sales.salesorderheader.territoryid` →        Lookup surrogate key berdasarkan territory_id  Jika tidak
-                                          `dim_territory.territory_id`                                                                 ditemukan,
-                                                                                                                                       gunakan unknown
-                                                                                                                                       territory key
-
-  promotion_key           INT             `sales.salesorderdetail.specialofferid` →     Lookup surrogate key berdasarkan               Jika tidak ada
-                                          `dim_promotion.special_offer_id`              specialofferid                                 promosi, gunakan
-                                                                                                                                       anggota
-                                                                                                                                       `No Promotion`
-
-  currency_key            INT             `sales.currencyrate.tocurrencycode` →         Lookup surrogate key berdasarkan kode mata     Jika tidak
-                                          `dim_currency.currency_code`                  uang transaksi                                 ditemukan,
-                                                                                                                                       gunakan unknown
-                                                                                                                                       currency key;
-                                                                                                                                       USD untuk rate
-                                                                                                                                       NULL masih
-                                                                                                                                       asumsi
-
-  currency_rate_id        INT             `sales.salesorderheader.currencyrateid`       Ambil langsung                                 NULL
-                                                                                                                                       diperbolehkan
-
-  average_rate            NUMERIC(18,8)   `sales.currencyrate.averagerate`              Ambil nilai kurs rata-rata                     NULL
-                                                                                                                                       diperbolehkan
-                                                                                                                                       jika tidak ada
-                                                                                                                                       currency rate
-
-  end_of_day_rate         NUMERIC(18,8)   `sales.currencyrate.endofdayrate`             Ambil nilai kurs akhir hari                    NULL
-                                                                                                                                       diperbolehkan
-                                                                                                                                       jika tidak ada
-                                                                                                                                       currency rate
-
-  order_qty               INT             `sales.salesorderdetail.orderqty`             Ambil jumlah produk                            Tidak boleh NULL
-
-  unit_price              NUMERIC(18,4)   `sales.salesorderdetail.unitprice`            Ambil harga satuan                             Tidak boleh NULL
-
-  discount_pct            NUMERIC(8,4)    `sales.salesorderdetail.unitpricediscount`    Ambil persentase diskon dalam bentuk desimal   Jika NULL, isi 0
-
-  gross_sales             NUMERIC(18,4)   `sales.salesorderdetail.orderqty`,            Hitung `orderqty * unitprice`                  Tidak boleh NULL
-                                          `unitprice`                                                                                  
-
-  discount_amount         NUMERIC(18,4)   `orderqty`, `unitprice`, `unitpricediscount`  Hitung                                         Jika diskon
-                                                                                        `(orderqty * unitprice) * unitpricediscount`   NULL, gunakan 0
-
-  net_sales               NUMERIC(18,4)   Hasil perhitungan                             Hitung `gross_sales - discount_amount`         Tidak boleh NULL
-  -----------------------------------------------------------------------------------------------------------------------------------------------------
-
-**Filter sumber fact:**
-
-``` sql
-WHERE soh.onlineorderflag = TRUE
+```sql
+WHERE soh.onlineorderflag = 1
 ```
 
-**Catatan perhitungan:** - `unitpricediscount` merupakan nilai diskon
-desimal; contoh `0.10` berarti 10%. - `gross_sales` dihitung dari
-kuantitas dikali harga satuan. - `discount_amount` dihitung dari gross
-sales dikali persentase diskon. - `net_sales` merupakan gross sales
-setelah dikurangi discount amount. - Jangan menjumlahkan
-`salesorderheader.totaldue` setelah join ke detail karena nilai header
-dapat berulang pada setiap baris detail. - Jumlah transaksi dihitung
-dengan `COUNT(DISTINCT sales_order_id)`, bukan jumlah baris fact.
+> **Catatan:** Nama tabel sumber di dokumen ini mengikuti hasil import AdventureWorks ke MySQL, yaitu nama tabel dengan awalan nama schema, misalnya `sales_salesorderheader` dan `production_product`. Nama tersebut bukan schema terpisah.
 
-------------------------------------------------------------------------
+## 2. Ringkasan Source dan Target
 
-## Urutan load
+| Target | Sumber utama | Sumber tambahan | Strategi |
+|---|---|---|---|
+| `dim_tanggal` | Generated Calendar | — | Type 0 |
+| `dim_product` | `production_product` | `production_productmodel`, `production_productsubcategory`, `production_productcategory` | Type 2 |
+| `dim_customer` | `sales_customer` | `person_person`, `sales_store` | Type 2 |
+| `dim_territory` | `sales_salesterritory` | — | Type 1 |
+| `dim_promotion` | `sales_specialoffer` | — | Type 1 |
+| `dim_currency` | `sales_currency` | `sales_currencyrate` untuk lookup transaksi | Type 0 |
+| `fact_online_sales` | `sales_salesorderdetail` | `sales_salesorderheader`, `sales_currencyrate`, dan seluruh dimensi DW | Transaction fact |
 
-1.  **Staging:** Ambil data sumber yang diperlukan dari
-    `adventureworks`, termasuk filter `onlineorderflag = TRUE` untuk
-    data transaksi online.
-2.  **dim_date:** Generate kalender untuk rentang tanggal transaksi.
-3.  **dim_product:** Load data produk beserta model, subkategori, dan
-    kategori.
-4.  **dim_customer:** Load data customer beserta person dan store.
-5.  **dim_territory:** Load data territory.
-6.  **dim_promotion:** Load master promosi dan anggota khusus
-    `No Promotion`.
-7.  **dim_currency:** Load master mata uang dan pastikan asumsi mata
-    uang untuk `currencyrateid` NULL telah divalidasi.
-8.  **fact_online_sales:** Lakukan lookup seluruh surrogate key
-    dimension, hitung measure, lalu load data fact.
+---
 
-> Sebelum fact dimuat, pastikan anggota `Unknown` pada dimension yang
-> diperlukan telah tersedia dan seluruh lookup surrogate key dapat
-> diselesaikan.
+## 3. Mapping Dimensi
 
-------------------------------------------------------------------------
+### 3.1 Target: `dim_tanggal` (SCD Type 0)
 
-## Catatan validasi sebelum implementasi
+**Sumber:** Generated Calendar. Tabel ini dibuat langsung pada database Data Warehouse menggunakan skrip standar dosen, bukan diambil dari tabel transaksi sumber.
 
-1.  Konfirmasi asumsi USD untuk transaksi dengan `currencyrateid` NULL.
-2.  Pastikan anggota khusus `No Promotion` tersedia sebelum load fact.
-3.  Tentukan surrogate key khusus untuk anggota `Unknown` pada setiap
-    dimension yang dibutuhkan.
-4.  Pastikan aturan SCD Type 2 untuk product dan customer memiliki
-    mekanisme pencatatan perubahan. Riwayat sebelum proses ETL mulai
-    berjalan tidak dapat direkonstruksi jika tidak tersedia pada sumber.
-5.  Validasi kembali tipe data target dengan DDL Star Schema V2.
+**Ketentuan standar:**
+- Rentang tanggal: `2010-01-01` sampai `2015-12-31`.
+- Jumlah tanggal kalender: 2.191 hari.
+- Satu baris tambahan untuk tanggal tidak diketahui dengan `tanggal_key = -1`.
+- Total yang diharapkan: 2.192 baris.
+- Struktur dan nama kolom mengikuti skrip dosen; jangan diubah.
+
+| Kolom target | Tipe target | Sumber / asal | Transformasi | Aturan |
+|---|---|---|---|---|
+| `tanggal_key` | INT (PK) | Generated Calendar | Format `tanggal` menjadi `YYYYMMDD`; nilai `-1` untuk unknown | NOT NULL |
+| `tanggal` | DATE | Generated Calendar | Satu baris untuk setiap tanggal pada rentang standar | NOT NULL, UNIQUE |
+| `tahun` | INT | `tanggal` | `YEAR(tanggal)` | NOT NULL |
+| `semester` | INT | `tanggal` | 1 jika bulan 1–6; 2 jika bulan 7–12 | NOT NULL |
+| `kuartal` | INT | `tanggal` | `QUARTER(tanggal)` | NOT NULL |
+| `bulan` | INT | `tanggal` | `MONTH(tanggal)` | NOT NULL |
+| `nama_bulan` | VARCHAR(15) | `tanggal` | Nama bulan bahasa Indonesia | NOT NULL |
+| `minggu_dalam_tahun` | INT | `tanggal` | Minggu ISO 8601, misalnya `WEEK(tanggal, 3)` | NOT NULL |
+| `tanggal_dalam_bulan` | INT | `tanggal` | `DAY(tanggal)` | NOT NULL |
+| `hari_dalam_minggu` | INT | `tanggal` | `WEEKDAY(tanggal) + 1`; Senin = 1 sampai Minggu = 7 | NOT NULL |
+| `nama_hari` | VARCHAR(15) | `tanggal` | Nama hari bahasa Indonesia | NOT NULL |
+| `is_akhir_pekan` | BOOLEAN | `tanggal` | TRUE untuk Sabtu dan Minggu | NOT NULL |
+
+**Hierarki waktu untuk OLAP:** Year → Semester → Quarter → Month → Date.
+
+**Relasi ke fact:** `dim_tanggal.tanggal_key` → `fact_online_sales.tanggal_key`.
+
+**Aturan lookup fact:** Ambil tanggal dari `sales_salesorderheader.orderdate`, ubah menjadi key `YYYYMMDD`, lalu lookup ke `dim_tanggal.tanggal_key`. Gunakan `-1` hanya jika tanggal transaksi kosong atau tidak dapat dipetakan.
+
+### 3.2 Target: `dim_product` (SCD Type 2)
+
+**Sumber utama:** `production_product`  
+**Sumber tambahan:** `production_productmodel`, `production_productsubcategory`, `production_productcategory`.
+
+| Kolom target | Tipe target | Tabel.kolom sumber | Transformasi | Aturan NULL |
+|---|---|---|---|---|
+| `product_key` | INT (PK) | DW | Surrogate key, AUTO_INCREMENT | NOT NULL |
+| `product_id` | INT | `production_product.productid` | Ambil sebagai business key | NOT NULL |
+| `product_name` | VARCHAR(100) | `production_product.name` | Ambil langsung | Boleh NULL sesuai DDL target |
+| `product_number` | VARCHAR(25) | `production_product.productnumber` | Ambil langsung | Boleh NULL sesuai DDL target |
+| `product_model_id` | INT | `production_product.productmodelid` | Ambil langsung | Boleh NULL |
+| `product_model_name` | VARCHAR(100) | `production_productmodel.name` | LEFT JOIN melalui `productmodelid` | Isi `Not Assigned` jika tidak tersedia |
+| `product_subcategory_id` | INT | `production_product.productsubcategoryid` | Ambil langsung | Boleh NULL |
+| `product_subcategory_name` | VARCHAR(100) | `production_productsubcategory.name` | LEFT JOIN melalui `productsubcategoryid` | Isi `Not Assigned` jika tidak tersedia |
+| `product_category_id` | INT | `production_productcategory.productcategoryid` | LEFT JOIN melalui `production_productsubcategory.productcategoryid` | Boleh NULL |
+| `product_category_name` | VARCHAR(100) | `production_productcategory.name` | LEFT JOIN melalui subcategory | Isi `Not Assigned` jika tidak tersedia |
+| `color` | VARCHAR(20) | `production_product.color` | Ambil langsung | Isi `Not Specified` jika NULL |
+| `size` | VARCHAR(10) | `production_product.size` | Ambil langsung | Isi `Not Specified` jika NULL |
+| `standard_cost` | DECIMAL(18,4) | `production_product.standardcost` | Ambil langsung | NULL diperbolehkan |
+| `list_price` | DECIMAL(18,4) | `production_product.listprice` | Ambil langsung | NULL diperbolehkan |
+| `effective_start_date` | DATE | ETL process | Tanggal mulai versi | NOT NULL; default awal sesuai kebijakan ETL |
+| `effective_end_date` | DATE | ETL process | Tanggal akhir versi; versi aktif memakai tanggal maksimum | NOT NULL |
+| `is_current` | TINYINT(1) | ETL process | 1 untuk versi aktif; 0 untuk versi lama | NOT NULL |
+
+**Aturan SCD Type 2:** Jika atribut yang dipantau berubah, tutup versi lama dengan memperbarui `effective_end_date` dan `is_current = 0`, kemudian buat versi baru dengan surrogate key baru. Riwayat perubahan sebelum ETL mulai berjalan tidak dapat direkonstruksi jika tidak tersedia pada sumber.
+
+### 3.3 Target: `dim_customer` (SCD Type 2)
+
+**Sumber utama:** `sales_customer`  
+**Sumber tambahan:** `person_person`, `sales_store`.
+
+| Kolom target | Tipe target | Tabel.kolom sumber | Transformasi | Aturan NULL |
+|---|---|---|---|---|
+| `customer_key` | INT (PK) | DW | Surrogate key, AUTO_INCREMENT | NOT NULL |
+| `customer_id` | INT | `sales_customer.customerid` | Ambil sebagai business key | NOT NULL |
+| `person_id` | INT | `sales_customer.personid` | Ambil langsung | Boleh NULL |
+| `store_id` | INT | `sales_customer.storeid` | Ambil langsung | Boleh NULL |
+| `customer_type` | VARCHAR(30) | `sales_customer.personid`, `sales_customer.storeid` | `Store` jika `storeid` tersedia; `Individual` jika `personid` tersedia; selain itu `Unknown` | Isi `Unknown` jika keduanya NULL |
+| `customer_name` | VARCHAR(150) | `person_person.firstname`, `middlename`, `lastname` | LEFT JOIN melalui `personid`; gabungkan nama yang tersedia | Isi `Not Assigned` jika tidak tersedia |
+| `store_name` | VARCHAR(150) | `sales_store.name` | LEFT JOIN melalui `storeid` | Isi `Not Assigned` jika NULL |
+| `effective_start_date` | DATE | ETL process | Tanggal mulai versi | NOT NULL |
+| `effective_end_date` | DATE | ETL process | Tanggal akhir versi; versi aktif memakai tanggal maksimum | NOT NULL |
+| `is_current` | TINYINT(1) | ETL process | 1 untuk versi aktif; 0 untuk versi lama | NOT NULL |
+
+**Aturan SCD Type 2:** Jika atribut customer yang dipantau berubah, buat versi baru. Saat fact dimuat, cari `customer_key` berdasarkan `customer_id` dan rentang tanggal transaksi agar versi yang sesuai dengan transaksi digunakan.
+
+### 3.4 Target: `dim_territory` (SCD Type 1)
+
+**Sumber utama:** `sales_salesterritory`.
+
+| Kolom target | Tipe target | Tabel.kolom sumber | Transformasi | Aturan NULL |
+|---|---|---|---|---|
+| `territory_key` | INT (PK) | DW | Surrogate key, AUTO_INCREMENT | NOT NULL |
+| `territory_id` | INT | `sales_salesterritory.territoryid` | Ambil sebagai business key | NOT NULL |
+| `territory_name` | VARCHAR(100) | `sales_salesterritory.name` | Ambil langsung | Boleh NULL sesuai DDL target |
+| `country_region_code` | VARCHAR(10) | `sales_salesterritory.countryregioncode` | Ambil langsung | Isi `Unknown` jika NULL |
+| `territory_group` | VARCHAR(50) | `sales_salesterritory.group` | Ambil langsung; `group` merupakan nama kolom yang perlu di-escape dengan backtick pada MySQL | Isi `Unknown` jika NULL |
+
+**Aturan SCD Type 1:** Perubahan atribut memperbarui nilai yang tersimpan tanpa mempertahankan versi sebelumnya. Territory tidak dihubungkan ke satu salesperson karena satu territory dapat memiliki beberapa salesperson. Ketersediaan `salespersonid` pada transaksi online MySQL perlu dipastikan melalui profiling sumber sebelum menyimpulkan nilainya.
+
+### 3.5 Target: `dim_promotion` (SCD Type 1)
+
+**Sumber utama:** `sales_specialoffer`.
+
+| Kolom target | Tipe target | Tabel.kolom sumber | Transformasi | Aturan NULL |
+|---|---|---|---|---|
+| `promotion_key` | INT (PK) | DW | Surrogate key, AUTO_INCREMENT | NOT NULL |
+| `special_offer_id` | INT | `sales_specialoffer.specialofferid` | Ambil sebagai business key | NOT NULL untuk promosi sumber |
+| `description` | VARCHAR(255) | `sales_specialoffer.description` | Ambil langsung | Isi `Not Assigned` jika NULL |
+| `offer_type` | VARCHAR(50) | `sales_specialoffer.type` | Ambil langsung | Isi `Not Assigned` jika NULL |
+| `category` | VARCHAR(50) | `sales_specialoffer.category` | Ambil langsung | Isi `Not Assigned` jika NULL |
+| `discount_pct` | DECIMAL(8,4) | `sales_specialoffer.discountpct` | Ambil nilai diskon dari master promosi | Isi 0 jika NULL |
+| `promotion_status` | VARCHAR(30) | `sales_specialoffer.startdate`, `enddate` | Hitung berdasarkan tanggal proses ETL: `Upcoming`, `Active`, atau `Expired` | `Unknown` jika tanggal tidak lengkap |
+
+**Anggota khusus:** Buat satu baris `No Promotion` pada `dim_promotion` untuk transaksi tanpa promosi. Fact menggunakan surrogate key anggota tersebut saat lookup.
+
+**Aturan SCD Type 1:** Perubahan atribut promosi memperbarui nilai yang tersimpan tanpa membuat versi historis.
+
+### 3.6 Target: `dim_currency` (SCD Type 0)
+
+**Sumber utama:** `sales_currency`.
+
+| Kolom target | Tipe target | Tabel.kolom sumber | Transformasi | Aturan NULL |
+|---|---|---|---|---|
+| `currency_key` | INT (PK) | DW | Surrogate key, AUTO_INCREMENT | NOT NULL |
+| `currency_code` | VARCHAR(10) | `sales_currency.currencycode` | Ambil sebagai business key | NOT NULL |
+| `currency_name` | VARCHAR(100) | `sales_currency.name` | Ambil langsung | Boleh NULL sesuai DDL target |
+
+**Aturan lookup mata uang transaksi:** Dari `sales_salesorderheader.currencyrateid`, LEFT JOIN ke `sales_currencyrate.currencyrateid`, gunakan `tocurrencycode`, lalu lookup ke `sales_currency.currencycode`.
+
+**Asumsi yang perlu divalidasi:** Transaksi dengan `currencyrateid` NULL sementara dipetakan ke USD sebagai mata uang dasar. Validasi asumsi ini terhadap data sumber atau aturan bisnis sebelum ETL final.
+
+**Aturan SCD Type 0:** Nilai dimension dipertahankan dan tidak diperbarui melalui mekanisme historisasi.
+
+---
+
+## 4. Mapping Fact Table
+
+### 4.1 Target: `fact_online_sales`
+
+**Sumber utama:** `sales_salesorderdetail`  
+**Sumber tambahan:** `sales_salesorderheader`, `sales_currencyrate`, serta seluruh dimension pada Data Warehouse.
+
+| Kolom target | Tipe target | Tabel.kolom sumber | Transformasi | Aturan |
+|---|---|---|---|---|
+| `sales_order_detail_id` | INT (PK) | `sales_salesorderdetail.salesorderdetailid` | Ambil ID detail sebagai primary key fact | NOT NULL |
+| `sales_order_id` | INT | `sales_salesorderdetail.salesorderid` | Ambil ID transaksi | NOT NULL |
+| `tanggal_key` | INT (FK) | `sales_salesorderheader.orderdate` | Format tanggal `YYYYMMDD`, lookup ke `dim_tanggal.tanggal_key` | Gunakan `-1` jika tanggal tidak diketahui/tidak dapat dipetakan |
+| `product_key` | INT (FK) | `sales_salesorderdetail.productid` → `dim_product.product_id` | Lookup surrogate key berdasarkan product dan versi yang berlaku | Gunakan anggota Unknown jika tidak ditemukan |
+| `customer_key` | INT (FK) | `sales_salesorderheader.customerid` → `dim_customer.customer_id` | Lookup surrogate key berdasarkan customer dan rentang tanggal transaksi | Gunakan anggota Unknown jika tidak ditemukan |
+| `territory_key` | INT (FK) | `sales_salesorderheader.territoryid` → `dim_territory.territory_id` | Lookup surrogate key berdasarkan territory_id | Gunakan anggota Unknown jika tidak ditemukan |
+| `promotion_key` | INT (FK) | `sales_salesorderdetail.specialofferid` → `dim_promotion.special_offer_id` | Lookup surrogate key berdasarkan specialofferid | Gunakan anggota `No Promotion` jika tidak ada promosi |
+| `currency_key` | INT (FK) | `sales_salesorderheader.currencyrateid` → `sales_currencyrate.tocurrencycode` → `dim_currency.currency_code` | Lookup surrogate key berdasarkan kode mata uang transaksi | Gunakan anggota Unknown jika tidak ditemukan; USD untuk rate NULL masih asumsi |
+| `currency_rate_id` | INT | `sales_salesorderheader.currencyrateid` | Ambil langsung | NULL diperbolehkan |
+| `average_rate` | DECIMAL(18,8) | `sales_currencyrate.averagerate` | Ambil nilai kurs rata-rata | NULL jika tidak ada currency rate |
+| `end_of_day_rate` | DECIMAL(18,8) | `sales_currencyrate.endofdayrate` | Ambil nilai kurs akhir hari | NULL jika tidak ada currency rate |
+| `order_qty` | INT | `sales_salesorderdetail.orderqty` | Ambil jumlah produk | NOT NULL |
+| `unit_price` | DECIMAL(18,4) | `sales_salesorderdetail.unitprice` | Ambil harga satuan | NOT NULL |
+| `discount_pct` | DECIMAL(8,4) | `sales_salesorderdetail.unitpricediscount` | Ambil persentase diskon desimal; contoh 0.10 = 10% | Isi 0 jika NULL |
+| `gross_sales` | DECIMAL(18,4) | `orderqty`, `unitprice` | `orderqty * unitprice` | NOT NULL |
+| `discount_amount` | DECIMAL(18,4) | `orderqty`, `unitprice`, `unitpricediscount` | `(orderqty * unitprice) * unitpricediscount` | Gunakan 0 jika diskon NULL |
+| `net_sales` | DECIMAL(18,4) | Hasil perhitungan | `gross_sales - discount_amount` | NOT NULL |
+
+### 4.2 Query dasar pengambilan fact dari sumber MySQL
+
+Contoh query untuk mengambil transaksi online dari database `adventureworks`:
+
+```sql
+SELECT
+    sod.salesorderdetailid,
+    sod.salesorderid,
+    soh.orderdate,
+    soh.customerid,
+    soh.territoryid,
+    soh.currencyrateid,
+    sod.productid,
+    sod.specialofferid,
+    sod.orderqty,
+    sod.unitprice,
+    sod.unitpricediscount
+FROM sales_salesorderdetail AS sod
+INNER JOIN sales_salesorderheader AS soh
+    ON sod.salesorderid = soh.salesorderid
+WHERE soh.onlineorderflag = 1;
+```
+
+Query tersebut merupakan staging awal. Lookup surrogate key ke seluruh dimension dan perhitungan measure dilakukan pada tahap transformasi ETL.
+
+### 4.3 Rumus measure
+
+| Measure | Rumus |
+|---|---|
+| `gross_sales` | `order_qty * unit_price` |
+| `discount_amount` | `gross_sales * discount_pct` |
+| `net_sales` | `gross_sales - discount_amount` |
+| Transaction Count | `COUNT(DISTINCT sales_order_id)` |
+| Average Discount (%) | `SUM(discount_amount) / SUM(gross_sales) * 100` |
+
+**Catatan perhitungan:**
+- `unitpricediscount` merupakan nilai diskon desimal; contoh `0.10` berarti 10%.
+- Jangan menjumlahkan `sales_salesorderheader.totaldue` setelah join ke detail karena nilai header dapat berulang pada setiap baris detail.
+- Jumlah transaksi dihitung dengan `COUNT(DISTINCT sales_order_id)`, bukan jumlah baris fact.
+- Hindari pembagian dengan nol pada Average Discount dan Average Selling Price.
+- Jangan menjumlahkan nilai penjualan lintas mata uang tanpa konversi ke mata uang dasar yang telah disepakati.
+
+---
+
+## 5. Urutan Load ETL
+
+Urutan load yang disarankan:
+
+1. **Staging:** Ambil data sumber yang diperlukan dari `adventureworks`, termasuk filter `onlineorderflag = 1` untuk transaksi online.
+2. **`dim_tanggal`:** Tabel kalender standar dosen sudah dibuat dan diisi pada database DW. Tidak perlu dibuat ulang oleh ETL; gunakan untuk lookup `tanggal_key`.
+3. **`dim_product`:** Load produk beserta model, subkategori, dan kategori.
+4. **`dim_customer`:** Load customer beserta person dan store.
+5. **`dim_territory`:** Load data territory.
+6. **`dim_promotion`:** Load master promosi dan anggota khusus `No Promotion`.
+7. **`dim_currency`:** Load master mata uang dan validasi asumsi mata uang untuk `currencyrateid` NULL.
+8. **`fact_online_sales`:** Lookup seluruh surrogate key dimension, hitung measure, lalu load data fact.
+
+> Sebelum fact dimuat, pastikan anggota `Unknown` pada dimension yang diperlukan telah tersedia dan seluruh lookup surrogate key dapat diselesaikan. Untuk tanggal tidak diketahui, gunakan anggota standar `tanggal_key = -1`.
+
+---
+
+## 6. Catatan Validasi Sebelum Implementasi
+
+1. Validasi asumsi USD untuk transaksi dengan `currencyrateid` NULL.
+2. Pastikan anggota khusus `No Promotion` tersedia sebelum load fact.
+3. Tentukan surrogate key khusus untuk anggota `Unknown` pada setiap dimension yang membutuhkannya.
+4. Pastikan aturan SCD Type 2 untuk product dan customer memiliki mekanisme pencatatan perubahan. Riwayat sebelum proses ETL mulai berjalan tidak dapat direkonstruksi jika tidak tersedia pada sumber.
+5. Pastikan tipe data target sesuai DDL aktual pada database `dw_kelompok_5`.
+6. Pastikan tabel sumber yang digunakan memang tersedia di database MySQL `adventureworks`.
+7. Pastikan lookup tanggal menggunakan `dim_tanggal.tanggal_key`, bukan nama tabel atau kolom tanggal versi lama.
+8. Validasi jumlah baris fact terhadap jumlah baris detail transaksi online yang memenuhi filter sumber.
+
+## 7. Riwayat Perubahan Dokumen
+
+| Bagian | Sebelumnya | Revisi terbaru |
+|---|---|---|
+| Dimensi waktu | `dim_date` | `dim_tanggal` standar dosen |
+| Primary key tanggal | `date_key` | `tanggal_key` |
+| Foreign key fact | `fact_online_sales.date_key` | `fact_online_sales.tanggal_key` |
+| Atribut kalender | `year_number`, `month_name`, dan lainnya | `tahun`, `semester`, `kuartal`, `bulan`, `nama_bulan`, atribut kalender standar dosen |
+| Sumber database | Nama tabel dengan schema terpisah | Nama tabel MySQL dengan prefix schema, misalnya `sales_salesorderheader` |
+| Proses kalender | Generate kalender sebagai bagian ETL | Kalender dibuat dari skrip dosen di DW; ETL melakukan lookup |
+
+**Status:** Dokumen mapping telah disesuaikan dengan database MySQL/MariaDB dan standar dimensi tanggal dosen. Aturan mata uang NULL, anggota Unknown, serta implementasi SCD Type 2 tetap perlu divalidasi sebelum ETL final.
