@@ -4,7 +4,7 @@
 **Kelompok:** 5\
 **Dashboard:** Online Sales Performance\
 **Sumber data:** Data Warehouse `dw_kelompok_5`\
-**OLAP Cube:** Online Sales Cube
+**OLAP Cube:** Online Sales Cube\
 **Status:** Rancangan wireframe (belum terhubung ke data aktual)
 
 ------------------------------------------------------------------------
@@ -18,7 +18,7 @@ lima Business Questions (BQ1--BQ5).
 
 Dashboard menggunakan enam dimension pada Star Schema V2:
 
-1.  `dim_date`
+1.  `dim_tanggal`
 2.  `dim_product`
 3.  `dim_customer`
 4.  `dim_territory`
@@ -71,7 +71,9 @@ Sidebar menampilkan navigasi workspace berikut:
   Settings             Pengaturan dashboard
 
 Sidebar juga menampilkan ringkasan OLAP Cube dengan enam dimension:
-Date, Product, Customer, Territory, Promotion, dan Currency.
+Tanggal, Product, Customer, Territory, Promotion, dan Currency.
+
+Dimension Tanggal menampilkan hierarki Year → Semester → Quarter → Month → Date.
 
 ### 2.2 Header
 
@@ -83,28 +85,22 @@ pembaruan terakhir (`Last updated`) - Placeholder profil pengguna
 
 Filter global yang tersedia pada wireframe:
 
-  -------------------------------------------------------------------------------------
-  Filter                  Dimension / Atribut                   Fungsi
-  ----------------------- ------------------------------------- -----------------------
-  Year                    `dim_date.year_number`                Memilih tahun analisis
+| Urutan | Filter | Dimension / Atribut | Fungsi |
+|---:|---|---|---|
+| 1 | Year | `dim_tanggal.tahun` | Memilih tahun analisis |
+| 2 | Semester | `dim_tanggal.semester` | Memilih semester: 1 (Januari–Juni) atau 2 (Juli–Desember) |
+| 3 | Quarter | `dim_tanggal.kuartal` | Memilih kuartal |
+| 4 | Month | `dim_tanggal.bulan`, `dim_tanggal.nama_bulan` | Memilih bulan |
+| 5 | Product Category | `dim_product.product_category_name` | Memfilter kategori produk |
+| 6 | Territory | `dim_territory.territory_name` | Memfilter wilayah |
+| 7 | Currency | `dim_currency.currency_code` | Memfilter mata uang transaksi |
 
-  Quarter                 `dim_date.quarter_number`             Memilih kuartal
+Urutan filter waktu adalah Year → Semester → Quarter → Month. Filter
+waktu saling terkait: pilihan pada tingkat waktu yang lebih tinggi
+membatasi pilihan pada tingkat di bawahnya. Filter global memengaruhi KPI
+dan visualisasi yang relevan.
 
-  Month                   `dim_date.month_number`, `month_name` Memilih bulan
-
-  Product Category        `dim_product.product_category_name`   Memfilter kategori
-                                                                produk
-
-  Territory               `dim_territory.territory_name`        Memfilter wilayah
-
-  Currency                `dim_currency.currency_code`          Memfilter mata uang
-                                                                transaksi
-  -------------------------------------------------------------------------------------
-
-Filter dirancang untuk membantu pengguna mempersempit data yang
-ditampilkan pada KPI dan visualisasi.
-
-------------------------------------------------------------------------
+---
 
 ## 3. KPI Summary Cards
 
@@ -153,14 +149,20 @@ bulan/tahun?
   Nomor visualisasi   01
   Judul               Monthly Online Sales Trend
   Tipe visualisasi    Line Chart
-  Dimension           `dim_date`
-  Atribut waktu       Year, Month
+  Dimension           `dim_tanggal`
+  Atribut waktu       `tahun`, `semester`, `kuartal`, `bulan`, `nama_bulan`, `tanggal`
   Measure             Net Sales, Transaction Count
-  Sumbu X             Month / Year
+  Sumbu X             `nama_bulan`, diurutkan berdasarkan `bulan`
   Sumbu Y             Net Sales dan Transaction Count
 
 **Tujuan:** Memantau perubahan nilai penjualan dan jumlah transaksi
 online dari waktu ke waktu.
+
+**Interaksi waktu:** Mendukung drill-down Year → Semester → Quarter →
+Month → Date. Label bulan menggunakan `nama_bulan` dalam bahasa
+Indonesia, sedangkan pengurutan wajib menggunakan nilai numerik `bulan`
+(1–12), bukan urutan alfabet. Jika lebih dari satu tahun ditampilkan,
+konteks tahun harus tetap terlihat.
 
 **Catatan desain:** Net Sales dan Transaction Count memiliki satuan yang
 berbeda. Pada implementasi, gunakan dua sumbu Y yang terpisah atau dua
@@ -395,7 +397,37 @@ visualisasi tidak muat pada tinggi layar.
 
 ------------------------------------------------------------------------
 
-## 8. Output dan Status Pekerjaan
+## 8. Standar Dimensi Tanggal
+
+Dashboard mengikuti tabel standar dosen `dim_tanggal` pada database
+`dw_kelompok_5`. Struktur atributnya adalah:
+
+| Atribut | Keterangan |
+|---|---|
+| `tanggal_key` | Primary key format YYYYMMDD; -1 untuk tanggal tidak diketahui |
+| `tanggal` | Tanggal lengkap |
+| `tahun` | Tahun kalender |
+| `semester` | 1 = Januari–Juni; 2 = Juli–Desember |
+| `kuartal` | Kuartal 1–4 |
+| `bulan` | Nomor bulan 1–12 |
+| `nama_bulan` | Nama bulan bahasa Indonesia |
+| `minggu_dalam_tahun` | Minggu ISO 8601 |
+| `tanggal_dalam_bulan` | Hari ke-1 sampai 31 |
+| `hari_dalam_minggu` | Senin = 1 sampai Minggu = 7 |
+| `nama_hari` | Nama hari bahasa Indonesia |
+| `is_akhir_pekan` | Penanda Sabtu dan Minggu |
+
+Rentang kalender standar adalah 2010-01-01 sampai 2015-12-31,
+ditambah satu baris khusus dengan `tanggal_key = -1`.
+
+Hierarki waktu utama: **Year → Semester → Quarter → Month → Date**.
+Gunakan `nama_bulan` untuk tampilan dan `bulan` untuk pengurutan.
+Jangan menggunakan nama tabel atau atribut lama seperti `dim_date`,
+`date_key`, `full_date`, `year_number`, atau `quarter_number`.
+
+---
+
+## 9. Output dan Status Pekerjaan
 
   -----------------------------------------------------------------------
   Output                  Format                  Keterangan
