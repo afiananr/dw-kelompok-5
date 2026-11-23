@@ -188,7 +188,7 @@ Belum tersedia informasi terverifikasi mengenai kendala koordinasi, komunikasi, 
 | Nama | Peran | Pekerjaan Pekan Ini | Bukti |
 |---|---|---|---|
 | Afiana Nurani | Project Manager | Mengkoordinasikan pekerjaan dan pemantauan progres anggota, mengumpulkan bukti pengerjaan, serta mengoordinasikan penyusunan laporan progres. | Perlu dilengkapi oleh anggota |
-| Vernanda Pramudya Sejati | ETL Developer | Membangun dan menjalankan transformasi ekstraksi, transformasi dimension dan fact, menyusun Job utama, memperbaiki konfigurasi ETL, serta melakukan pengujian eksekusi ulang dan validasi hasil. | [Bukti](laporan/Tugas_pekan_12/) |
+| Vernanda Pramudya Sejati | ETL Developer | Membangun dan menjalankan transformasi ekstraksi, transformasi dimension dan fact, menyusun Job utama, memperbaiki konfigurasi ETL, serta melakukan pengujian eksekusi ulang dan validasi hasil. | [Bukti](/laporan/Tugas_pekan_12/bukti_commit.png) |
 | Zyndi Auralia Wibowo | Data Modeler | Meninjau kesesuaian struktur dimension dan fact terhadap Star Schema V2, serta mendukung validasi struktur dan relasi data warehouse. | Perlu dilengkapi oleh anggota |
 | Reva Luvika Apriliani | OLAP Developer | Meninjau kesiapan struktur dimension dan fact untuk kebutuhan OLAP Cube serta menyiapkan tahapan implementasi Mondrian. | Perlu dilengkapi oleh anggota |
 | Caroline Febryanty | Dashboard Developer | Meninjau kesiapan data warehouse terhadap kebutuhan visualisasi dan menyiapkan tahapan integrasi dashboard. | Perlu dilengkapi oleh anggota |
