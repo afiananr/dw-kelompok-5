@@ -3,8 +3,8 @@
 -- Target database : dw_kelompok_5 (MySQL/MariaDB)
 -- DDL baseline    : Pekan 11
 -- Catatan:
--- 1. dim_tanggal tidak dibuat ulang karena menggunakan script
---    standar dosen (versi 1.0).
+-- 1. Struktur dim_tanggal disertakan dengan CREATE TABLE IF NOT EXISTS.
+--    Data kalender lengkap tetap berasal dari script standar dosen versi 1.0.
 -- 2. CREATE TABLE IF NOT EXISTS tidak mengubah tabel yang sudah ada.
 -- 3. INSERT IGNORE membuat unknown member hanya sekali.
 -- 4. Tidak ada DROP TABLE / DELETE pada script ini.
@@ -13,7 +13,41 @@
 USE dw_kelompok_5;
 
 -- =============================================================
--- 1. DIM_PRODUCT (SCD Type 2)
+-- 1. DIM_TANGGAL (struktur standar dosen versi 1.0)
+-- CREATE TABLE IF NOT EXISTS menjaga tabel yang sudah ada.
+-- Data kalender lengkap tetap diisi melalui script standar
+-- dim_tanggal.sql versi 1.0 (2010-01-01 s.d. 2015-12-31).
+-- =============================================================
+CREATE TABLE IF NOT EXISTS dim_tanggal (
+    tanggal_key INT(11) NOT NULL,
+    tanggal DATE NOT NULL,
+    tahun INT(11) NOT NULL,
+    semester INT(11) NOT NULL,
+    kuartal INT(11) NOT NULL,
+    bulan INT(11) NOT NULL,
+    nama_bulan VARCHAR(15) NOT NULL,
+    minggu_dalam_tahun INT(11) NOT NULL,
+    tanggal_dalam_bulan INT(11) NOT NULL,
+    hari_dalam_minggu INT(11) NOT NULL,
+    nama_hari VARCHAR(15) NOT NULL,
+    is_akhir_pekan TINYINT(1) NOT NULL,
+    PRIMARY KEY (tanggal_key),
+    UNIQUE KEY uq_dim_tanggal_tanggal (tanggal)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  COMMENT='Dimensi tanggal standar kelas DW, versi 1.0';
+
+-- Unknown member dim_tanggal sesuai standar dosen.
+INSERT IGNORE INTO dim_tanggal (
+    tanggal_key, tanggal, tahun, semester, kuartal, bulan,
+    nama_bulan, minggu_dalam_tahun, tanggal_dalam_bulan,
+    hari_dalam_minggu, nama_hari, is_akhir_pekan
+) VALUES (
+    -1, '1900-01-01', 0, 0, 0, 0,
+    'Tidak diketahui', 0, 0, 0, 'Tidak diketahui', 0
+);
+
+-- =============================================================
+-- 2. DIM_PRODUCT (SCD Type 2)
 -- =============================================================
 CREATE TABLE IF NOT EXISTS dim_product (
     product_key INT(11) NOT NULL AUTO_INCREMENT,
@@ -43,7 +77,7 @@ CREATE TABLE IF NOT EXISTS dim_product (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =============================================================
--- 2. DIM_CUSTOMER (SCD Type 2)
+-- 3. DIM_CUSTOMER (SCD Type 2)
 -- =============================================================
 CREATE TABLE IF NOT EXISTS dim_customer (
     customer_key INT(11) NOT NULL AUTO_INCREMENT,
@@ -64,7 +98,7 @@ CREATE TABLE IF NOT EXISTS dim_customer (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =============================================================
--- 3. DIM_TERRITORY (SCD Type 1)
+-- 4. DIM_TERRITORY (SCD Type 1)
 -- =============================================================
 CREATE TABLE IF NOT EXISTS dim_territory (
     territory_key INT(11) NOT NULL AUTO_INCREMENT,
@@ -77,7 +111,7 @@ CREATE TABLE IF NOT EXISTS dim_territory (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =============================================================
--- 4. DIM_PROMOTION (SCD Type 1)
+-- 5. DIM_PROMOTION (SCD Type 1)
 -- =============================================================
 CREATE TABLE IF NOT EXISTS dim_promotion (
     promotion_key INT(11) NOT NULL AUTO_INCREMENT,
@@ -92,7 +126,7 @@ CREATE TABLE IF NOT EXISTS dim_promotion (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =============================================================
--- 5. DIM_CURRENCY (SCD Type 0)
+-- 6. DIM_CURRENCY (SCD Type 0)
 -- =============================================================
 CREATE TABLE IF NOT EXISTS dim_currency (
     currency_key INT(11) NOT NULL AUTO_INCREMENT,
@@ -103,7 +137,7 @@ CREATE TABLE IF NOT EXISTS dim_currency (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =============================================================
--- 6. FACT_ONLINE_SALES
+-- 7. FACT_ONLINE_SALES
 -- Grain: satu baris untuk satu detail produk pada transaksi online.
 -- =============================================================
 CREATE TABLE IF NOT EXISTS fact_online_sales (
@@ -147,7 +181,7 @@ CREATE TABLE IF NOT EXISTS fact_online_sales (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =============================================================
--- 7. UNKNOWN MEMBERS (surrogate key = -1)
+-- 8. UNKNOWN MEMBERS (surrogate key = -1)
 -- INSERT IGNORE menjaga agar script dapat dijalankan berulang.
 -- =============================================================
 
